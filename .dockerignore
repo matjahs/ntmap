@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env
+.venv
+venv
+**/__pycache__
+**/*.pyc
+backend/app/settings.ini
+www/js/settings.js
+docs/media
+*.md
+!README.md

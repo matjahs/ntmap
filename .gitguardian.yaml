@@ -1,0 +1,12 @@
+# Local ggshield / IDE scans. Example configs hold empty placeholders only;
+# do not put real credentials in these paths.
+version: 2
+
+secret:
+  show_secrets: false
+  ignored_paths:
+    - '.env.example'
+    - 'backend/app/example.settings.ini'
+    - 'docs/**/*'
+    - '**/example.settings.*'
+    - '**/example.*.js'
