@@ -1,0 +1,43 @@
+services:
+  ntmap-db:
+    image: postgres:16-alpine
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      POSTGRES_DB: ${NTMAP_DB_NAME:-ntmap}
+      POSTGRES_USER: ${NTMAP_DB_USER:-ntmap}
+      # Credentials come from .env via env_file (not inlined here).
+    volumes:
+      - ntmap-db-data:/var/lib/postgresql/data
+      - ./docker/init-ntmap.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${NTMAP_DB_USER:-ntmap} -d ${NTMAP_DB_NAME:-ntmap}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ntmap:
+    build: .
+    ports:
+      - "${NTMAP_HTTP_PORT:-8080}:80"
+    dns:
+      - ${DNS_SERVER:-172.16.0.1}
+    depends_on:
+      ntmap-db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      NTMAP_DB_HOST: ntmap-db
+      NTMAP_DB_PORT: 5432
+      NTMAP_DB_NAME: ${NTMAP_DB_NAME:-ntmap}
+      NTMAP_DB_USER: ${NTMAP_DB_USER:-ntmap}
+      MAX_OBJECTS_AT_ONE_LEVEL: ${MAX_OBJECTS_AT_ONE_LEVEL:-100}
+      NETBOX_URL: ${NETBOX_URL:-}
+      NETBOX_TOKEN: ${NETBOX_TOKEN:-}
+      NTMAP_BACKEND_URI: ${NTMAP_BACKEND_URI:-/data}
+
+volumes:
+  ntmap-db-data:
